@@ -20,6 +20,9 @@ pydantic and PyYAML), and only on a yes run `install --with-deps`.
 
 Each `lr` command prints one JSON envelope: read `ok` first; with `false`, give the error and its `hint` as they are.
 
+Write input files under `<home>/drafts/`. The plugin refuses any direct edit inside `<home>/reports/` and
+`<home>/app/`: a saved report changes only by reading it again with `lr read`.
+
 ## Steps
 
 1. **Read the report as printed.** From the PDF, photo or text, list each result with its name, value, unit and the

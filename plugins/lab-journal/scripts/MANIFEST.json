@@ -61,5 +61,12 @@
   "vocab/dashboard.py": "9ae7984c31b5bb3637ee3140f8bdef7d3ad28e83799d0980018edea74f935048",
   "vocab/journal.py": "afe59f8f4350ef50f46150960f1285a5b469c0ae5e47dafec895c876f4454b16",
   "vocab/record.py": "f87115471c338da12dcf43868768545a59ce5b70238826074162e01a027c8f61"
+ },
+ "guard": {
+  "title": "Lab Journal",
+  "records": [
+   "journal"
+  ],
+  "how": "Write the entry JSON under <home>/drafts/ and save it with `<home>/lj save --file <draft>`; files go in with `lj attach`. A signed entry never changes: write a new entry with \"amends\"."
  }
 }

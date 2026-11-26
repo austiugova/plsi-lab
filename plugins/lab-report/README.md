@@ -9,7 +9,9 @@ Commands: `/lab-read`, `/lab-card`. The numbers come from the same code PLSI use
 
 ## Your data
 
-Reports stay in `~/lab-report/` (or `$LABREPORT_HOME`). Only birth year and sex are asked; never a name. Nothing is
+Reports stay in `~/lab-report/` (or `$LABREPORT_HOME`). Only birth year and sex are asked; never a name. While the plugin
+is installed, the agent cannot edit saved reports directly: a correction means reading the report again, so
+every saved value has been through the unit and range checks. Nothing is
 sent anywhere. It runs on macOS and Linux (Windows through WSL) and needs Python 3.11+ with pydantic 2 and PyYAML;
 if they are missing, the agent asks before setting up a private environment with uv.
 

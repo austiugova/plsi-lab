@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Cursor hook: the journal and its code change only through `lj`."""
+"""Cursor hook: a plugin's code and records change only through its own commands (folders from MANIFEST.json)."""
 import json
 import os
 import re
@@ -9,19 +9,22 @@ from pathlib import Path
 DESTRUCTIVE = re.compile(r"(^|[\s;&|(])(rm|mv|truncate|shred|unlink|chmod|chown)\s|sed\s+(-\w*\s+)*-i|perl\s+-\w*i|"
                          r"(^|[^>])>{1,2}\s*\S|\btee\b|\bcp\b|\brsync\b|python3?\s+-c")
 OK = {"permission": "allow"}
+MANIFEST: dict = {}
+GUARD: dict = {}
 
 
 def home():
-    return Path(os.environ.get("LABJOURNAL_HOME") or "~/lab-journal").expanduser()
+    return Path(os.environ.get(MANIFEST["home_env"]) or MANIFEST["home_default"]).expanduser()
 
 
 def guarded(path: Path, h: Path):
+    """'code', 'records' or None for a path."""
     try:
         rel = path.resolve().relative_to(h)
     except ValueError:
         return None
     top = rel.parts[0] if rel.parts else ""
-    return {"app": "code", "journal": "entry", "lj": "code"}.get(top)
+    return "code" if top in ("app", MANIFEST["command"]) else "records" if top in GUARD["records"] else None
 
 
 def strings(obj):
@@ -40,16 +43,14 @@ def tool(event, h):
     for s in strings(event.get("tool_input") or {}):
         if "\n" in s or len(s) > 1024 or ("/" not in s and "\\" not in s):
             continue
-        kind = guarded((cwd / Path(s).expanduser()), h)
+        kind = guarded(cwd / Path(s).expanduser(), h)
         if kind == "code":
-            return {"permission": "deny", "user_message": "Lab Journal: its installed code is never edited.",
-                    "agent_message": f"{s} is the Lab Journal's checked code: never edit it. A missing calculation is "
-                                     "'not in this journal yet'; an update is a reinstall from the plugin (install.py install)."}
-        if kind == "entry":
-            return {"permission": "deny", "user_message": "Lab Journal: entries change only through the journal.",
-                    "agent_message": f"{s} is inside the journal. Write the entry JSON under {h}/drafts/ and save it with "
-                                     f"`{h}/lj save --file <draft>`; files go in with `lj attach`. A signed entry never "
-                                     "changes: write a new entry with \"amends\"."}
+            return {"permission": "deny", "user_message": f"{GUARD['title']}: its installed code is never edited.",
+                    "agent_message": f"{s} is the {GUARD['title']}'s checked code: never edit it. A missing feature is "
+                                     "'not in this plugin yet'; an update is a reinstall from the plugin (install.py install)."}
+        if kind == "records":
+            return {"permission": "deny", "user_message": f"{GUARD['title']}: records change only through its commands.",
+                    "agent_message": f"{s} is a {GUARD['title']} record. " + GUARD["how"].replace("<home>", str(h))}
     return OK
 
 
@@ -59,15 +60,18 @@ def shell(event, h):
     for base in {str(Path.home()), str(Path.home().resolve())}:
         names |= {n.replace(base, "~", 1) for n in list(names) if n.startswith(base)}
         names |= {n.replace(base, "$HOME", 1) for n in list(names) if n.startswith(base)}
-    touches = any(f"{n}/journal" in cmd or f"{n}/app" in cmd for n in names)
-    if touches and DESTRUCTIVE.search(cmd) and not cmd.lstrip().startswith(tuple(f"{n}/lj " for n in names)):
-        return {"permission": "ask", "user_message": "This command could change or delete Lab Journal records. Allow it?",
-                "agent_message": "Journal records change only through `lj` commands; a backup is `tar czf` of the journal."}
+    tops = ("app", *GUARD["records"])
+    touches = any(f"{n}/{t}" in cmd for n in names for t in tops)
+    if touches and DESTRUCTIVE.search(cmd) and not cmd.lstrip().startswith(tuple(f"{n}/{MANIFEST['command']} " for n in names)):
+        return {"permission": "ask", "user_message": f"This command could change or delete {GUARD['title']} records. Allow it?",
+                "agent_message": f"{GUARD['title']} records change only through its commands; a backup is a `tar czf` copy."}
     return OK
 
 
 def main():
     try:
+        MANIFEST.update(json.loads((Path(__file__).resolve().parent / "MANIFEST.json").read_text(encoding="utf-8")))
+        GUARD.update(MANIFEST["guard"])
         event = json.load(sys.stdin)
         h = home().resolve() if "tool_input" in event else home()
         result = shell(event, h) if "command" in event and "tool_input" not in event else tool(event, h)

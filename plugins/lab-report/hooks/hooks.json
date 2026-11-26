@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "hooks": {
+    "preToolUse": [
+      {
+        "command": "python3 ./scripts/guard.py",
+        "matcher": "Write|Delete"
+      }
+    ],
+    "beforeShellExecution": [
+      {
+        "command": "python3 ./scripts/guard.py",
+        "matcher": "lab-report"
+      }
+    ]
+  }
+}

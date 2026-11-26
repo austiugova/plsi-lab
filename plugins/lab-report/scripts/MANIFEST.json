@@ -48,5 +48,12 @@
   "vocab/evidence.py": "b7b84484d954e623d6c1bfc9484fc1f4e8ae8006243051a25f9ea8f84ab95b4c",
   "vocab/ranked.py": "97c0f52b4b19ba6a45362584e7bf14466e1b9f5fb83d24f65555c81c0034f7e5",
   "vocab/record.py": "ec0adea93ef177a58fe1aba0ee02abd29b47fe411edaf2d82b1348e9245363f0"
+ },
+ "guard": {
+  "title": "Lab Report",
+  "records": [
+   "reports"
+  ],
+  "how": "Saved reports change only by reading the report again: correct the values in <home>/drafts/report.json and run `<home>/lr read --file <home>/drafts/report.json`."
  }
 }
