@@ -1,0 +1,16 @@
+{
+ "files": {},
+ "cases": [
+  [
+   [
+    "show",
+    "--nct",
+    "NOT-AN-ID"
+   ],
+   {
+    "ok": false,
+    "error.code": "NCT_ID"
+   }
+  ]
+ ]
+}

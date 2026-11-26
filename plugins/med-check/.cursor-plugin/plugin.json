@@ -1,0 +1,21 @@
+{
+  "name": "med-check",
+  "displayName": "Med & Supplement Check",
+  "version": "0.1.0",
+  "description": "Read each medicine's official FDA label for warnings that name your other medicines, supplements, conditions or allergies, quoted with the label link.",
+  "author": {
+    "name": "PLSI contributors"
+  },
+  "license": "MIT",
+  "homepage": "https://longevitygrok.si/",
+  "keywords": [
+    "medication",
+    "supplements",
+    "drug label",
+    "openfda",
+    "patients",
+    "physicians",
+    "health"
+  ],
+  "logo": "assets/logo.svg"
+}

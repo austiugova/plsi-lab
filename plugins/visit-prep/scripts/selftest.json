@@ -1,0 +1,42 @@
+{
+ "files": {
+  "v.json": "eyJ2aXNpdF9kYXRlIjogIjIwMjYtMTItMDEiLCAiZm9yIjogInBhdGllbnQiLCAicmVhc29uIjogInllYXJseSBjaGVjay11cCIsICJsYXN0X3Zpc2l0IjogIjIwMjUtMTEtMjAiLAogImNoYW5nZXMiOiBbIm1vcmUgdGlyZWQgaW4gdGhlIGFmdGVybm9vbnMgc2luY2UgT2N0b2JlciJdLCAibWVkaWNpbmVzIjogWyJtZXRmb3JtaW4gNTAwIG1nIHR3aWNlIGEgZGF5IiwgInZpdGFtaW4gRCAxMDAwIElVIl0sCiAicmVzdWx0cyI6IFt7Im1hcmtlciI6ICJIYkExYyIsICJ2YWx1ZSI6IDYuMSwgInVuaXQiOiAiJSIsICJsYWJfcG9zaXRpb24iOiAiYWJvdmUiLCAiY2hhbmdlIjogMC4zLCAiY2hhbmdlX3VuaXQiOiAiJSIsCiAgICAgICAgICAgICAgInByZXZpb3VzX2RhdGUiOiAiMjAyNS0xMS0yMCJ9XSwKICJxdWVzdGlvbnMiOiBbIklzIG15IEhiQTFjIGdvaW5nIHRoZSB3cm9uZyB3YXk/IiwgIlNob3VsZCBJIGtlZXAgdGFraW5nIHZpdGFtaW4gRD8iXX0=",
+  "bad.json": "eyJ2aXNpdF9kYXRlIjogIi4uLy4uL3gifQ=="
+ },
+ "cases": [
+  [
+   [
+    "page",
+    "--file",
+    "{w}/v.json"
+   ],
+   {
+    "ok": true,
+    "data.for": "patient",
+    "data.results": 1,
+    "data.questions": 2
+   }
+  ],
+  [
+   [
+    "page",
+    "--file",
+    "{w}/missing.json"
+   ],
+   {
+    "ok": false
+   }
+  ],
+  [
+   [
+    "page",
+    "--file",
+    "{w}/bad.json"
+   ],
+   {
+    "ok": false,
+    "error.code": "VISIT_INPUT"
+   }
+  ]
+ ]
+}

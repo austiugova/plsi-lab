@@ -1,0 +1,20 @@
+{
+  "name": "trial-scout",
+  "displayName": "Trial Scout",
+  "version": "0.1.0",
+  "description": "Find recruiting clinical trials on ClinicalTrials.gov near you, with age and sex checked against each study's eligibility and the full criteria in plain words.",
+  "author": {
+    "name": "PLSI contributors"
+  },
+  "license": "MIT",
+  "homepage": "https://longevitygrok.si/",
+  "keywords": [
+    "clinical trials",
+    "clinicaltrials.gov",
+    "patients",
+    "physicians",
+    "research",
+    "health"
+  ],
+  "logo": "assets/logo.svg"
+}

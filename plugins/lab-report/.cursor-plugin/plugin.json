@@ -1,0 +1,20 @@
+{
+  "name": "lab-report",
+  "displayName": "Lab Report",
+  "version": "0.1.0",
+  "description": "Read a blood test with tested code: units converted, values against the lab's ranges, and your blood-test age (PhenoAge, Levine 2018). Reports stay on your computer.",
+  "author": {
+    "name": "PLSI contributors"
+  },
+  "license": "MIT",
+  "homepage": "https://longevitygrok.si/",
+  "keywords": [
+    "blood test",
+    "lab results",
+    "phenoage",
+    "biological age",
+    "longevity",
+    "health"
+  ],
+  "logo": "assets/logo.svg"
+}

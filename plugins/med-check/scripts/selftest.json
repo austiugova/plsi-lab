@@ -1,0 +1,18 @@
+{
+ "files": {
+  "bad.json": "eyJpdGVtcyI6IFtdfQ=="
+ },
+ "cases": [
+  [
+   [
+    "check",
+    "--file",
+    "{w}/bad.json"
+   ],
+   {
+    "ok": false,
+    "error.code": "CHECK_INPUT"
+   }
+  ]
+ ]
+}

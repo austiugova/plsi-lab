@@ -1,0 +1,37 @@
+{
+  "name": "plsi-lab",
+  "owner": {
+    "name": "PLSI contributors"
+  },
+  "metadata": {
+    "description": "Research tools from PLSI for Cursor",
+    "version": "0.1.0"
+  },
+  "plugins": [
+    {
+      "name": "lab-journal",
+      "source": "./plugins/lab-journal",
+      "description": "A wet-lab notebook with tested bench numbers, versions and signing"
+    },
+    {
+      "name": "lab-report",
+      "source": "./plugins/lab-report",
+      "description": "A blood test read with tested code, and your blood-test age"
+    },
+    {
+      "name": "trial-scout",
+      "source": "./plugins/trial-scout",
+      "description": "Recruiting clinical trials near you, with eligibility checked"
+    },
+    {
+      "name": "med-check",
+      "source": "./plugins/med-check",
+      "description": "FDA label warnings that name your other medicines and supplements"
+    },
+    {
+      "name": "visit-prep",
+      "source": "./plugins/visit-prep",
+      "description": "A printable one-page summary before a doctor's visit"
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+ctgov:
+  title: ClinicalTrials.gov API v2
+  url: https://clinicaltrials.gov/data-api/api
+  api_base: https://clinicaltrials.gov/api/v2
+  cite_url: https://clinicaltrials.gov/study/{id}
+  notes: GET /studies?query.intr=I&query.cond=C&pageSize=N; GET /studies/{NCT} (404 = not found). No key.

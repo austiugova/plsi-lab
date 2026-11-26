@@ -1,0 +1,20 @@
+{
+  "name": "visit-prep",
+  "displayName": "Visit Prep",
+  "version": "0.1.0",
+  "description": "A printable one-page summary before a doctor's visit: reason, what changed, results with their change since the last test, medicines, and the questions to ask. For patients and physicians.",
+  "author": {
+    "name": "PLSI contributors"
+  },
+  "license": "MIT",
+  "homepage": "https://longevitygrok.si/",
+  "keywords": [
+    "doctor visit",
+    "appointment",
+    "patients",
+    "physicians",
+    "health summary",
+    "lab results"
+  ],
+  "logo": "assets/logo.svg"
+}

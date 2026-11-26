@@ -1,0 +1,20 @@
+{
+  "name": "lab-journal",
+  "displayName": "Lab Journal",
+  "version": "0.1.0",
+  "description": "A wet-lab notebook kept on your computer: entries with versions and signing, plasmid maps, cell bank, day plans, one page to open, and bench numbers from tested code (dilutions, master mixes, RT-qPCR ΔΔCt, gels, westerns).",
+  "author": {
+    "name": "PLSI contributors"
+  },
+  "license": "MIT",
+  "homepage": "https://longevitygrok.si/",
+  "keywords": [
+    "lab notebook",
+    "wet lab",
+    "qpcr",
+    "plasmid",
+    "cell culture",
+    "research"
+  ],
+  "logo": "assets/logo.svg"
+}

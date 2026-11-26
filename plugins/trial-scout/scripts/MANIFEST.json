@@ -1,0 +1,35 @@
+{
+ "package": "trialscout",
+ "command": "ts",
+ "home_env": "TRIALSCOUT_HOME",
+ "home_default": "~/trial-scout",
+ "version": "0.1.0+plsi.8e5dbf3",
+ "deps": [
+  "pydantic>=2,<3",
+  "PyYAML"
+ ],
+ "check": "import sys, pydantic, yaml; sys.exit(0 if sys.version_info >= (3, 11) and pydantic.VERSION.startswith('2') else 1)",
+ "files": {
+  "__init__.py": "19d04beb701a3558c49b8b3d99cf4b1633ac2163a1b06fb7555a716cd3950cea",
+  "__main__.py": "79b171eb166726693d421e5b25db7dbb83ad963c8aaf5e28d29cd1acb7a48711",
+  "cli.py": "4a32d6f5e4d06f6bde43f58580f2c6c1f3d8b7477d4fbcfe86e57d92b656ed37",
+  "clock.py": "d2904942d3e2d358cb547b221d760b2b2360b8eecfdc134630bdc07a4e186c96",
+  "cmdspec.py": "aa12c9a6d6f74916b76d36168c5d504ec0b01ad39b288993310891581700f16e",
+  "codes.py": "7543cea025aa083e19c42eb724c3c4717a257404cd1e9ddeec203612fe23b6a5",
+  "errors.py": "105a6bd243a5dad5e04f9ab216f0b6292a7abf3a9bfd3e8e3323cec7339b7b75",
+  "files.py": "26784163470906c127b658d29a828a2a34c482c0025fa1364afb5608ca0f3361",
+  "keys.py": "855944f31bdad18c4a0a85e8ea003beccb18116ffa6bd99f6f186fd94c04e420",
+  "models.py": "7e79dce8faa59c07d2b3f3cc94b0d768fd8915fe0421001011d2e8404fbf872c",
+  "mothership/references/evidence_source.yaml": "3f9cd2066442f28160c5934dfb97ca77b92170251a4d818b9205582c0ca236f3",
+  "net.py": "2c84bedd0f9589be4c5b3434d6102ca8480755480afa69006747d36a0f94d64e",
+  "paths.py": "bc397d7457b46875031b335f1f4a4cdd0dcb42020d322babeb514031692b1323",
+  "plugin.py": "6ad6195f1dc96cf931f401f69cf6e9d273e93412fa32fbe91e057fa507ac7d52",
+  "policy/__init__.py": "6a0118d9b3faae2fb01bd5daa13470d84cafb9c028758653098c8aab107bd1a1",
+  "policy/ctgov.py": "6eb3db7a41bc42e868fed921005e548b7ed4e1ec53aa189c662e471148474565",
+  "references.py": "8373b22e80416253e5aa926b2a1b43c3b228d41b31a2242c2f3019817203f263",
+  "vocab/__init__.py": "0e6942872d98195ee0a3e68d8067fc2a0eb1507dcca9cd306d202020efed82f9",
+  "vocab/dashboard.py": "9ae7984c31b5bb3637ee3140f8bdef7d3ad28e83799d0980018edea74f935048",
+  "vocab/mothership.py": "dc6800385adacd063faed2387d7602d20ec8fde68c09c8f794ce952ba7a993e4",
+  "vocab/record.py": "ddcd0f618131e7c46cbb5b6d4fc0dd36f1a7bbad6ab2c00f8b363dba513e4559"
+ }
+}

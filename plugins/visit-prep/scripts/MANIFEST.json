@@ -1,0 +1,29 @@
+{
+ "package": "visitprep",
+ "command": "vp",
+ "home_env": "VISITPREP_HOME",
+ "home_default": "~/visit-prep",
+ "version": "0.1.0+plsi.8e5dbf3",
+ "deps": [
+  "pydantic>=2,<3",
+  "PyYAML"
+ ],
+ "check": "import sys, pydantic, yaml; sys.exit(0 if sys.version_info >= (3, 11) and pydantic.VERSION.startswith('2') else 1)",
+ "files": {
+  "__init__.py": "d0e22676f6b536788def387092e4c37b083c62ededf9f14258412452071e13e1",
+  "__main__.py": "f803edc34849a15a884ec2e6161ed9bf8139b8e602a0cd263c1f1fff75309b4b",
+  "cli.py": "2818b4a63d8850d1d384abf371f7e97aeafb9eb49ce637640b29964b150204e1",
+  "clock.py": "d2904942d3e2d358cb547b221d760b2b2360b8eecfdc134630bdc07a4e186c96",
+  "cmdspec.py": "afa99f74a13c101fb13a5bf733dd98e33541b805cbda9dc397a3ca68a545e3d5",
+  "codes.py": "21a0337aae86c1d0ff40ff12955a65abefbabfd53a3fa7531ce839ec2e339a0a",
+  "errors.py": "3ddc135434254faf0b43855639f63233cc83ee77eee2fc8d91367491f0cb44e8",
+  "files.py": "5d64a281166a10c82ae6c457431c8f3eb462e7728da3cf0872245fdd7680c376",
+  "keys.py": "8f5f06d809e606008546d76161ecfe51f2d7e22c2d7c831bcc57050dc2346285",
+  "models.py": "ccaa55c6720e2e26de77f2c313fe584160d3f9953d7af3065bc92fff389d74ae",
+  "paths.py": "e7495ae13cfcdffb88a835f6df30859a65b780f4753a3b0e9d0642fe886a90c4",
+  "plugin.py": "7f05cb73afd98d83e57b13d856a6ec24ea1fd74848a9cd3b87bc740bbe5365cc",
+  "vocab/__init__.py": "c3fa216c304c4e9dd3efda8668be7e42578b9ee6739d1bbb6f6caaaed7155977",
+  "vocab/dashboard.py": "9ae7984c31b5bb3637ee3140f8bdef7d3ad28e83799d0980018edea74f935048",
+  "vocab/record.py": "ddcd0f618131e7c46cbb5b6d4fc0dd36f1a7bbad6ab2c00f8b363dba513e4559"
+ }
+}

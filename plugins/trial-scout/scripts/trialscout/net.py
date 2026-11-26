@@ -1,0 +1,210 @@
+"""Plain HTTP client. The only module that opens network connections.
+
+- 10 s connect / per-read timeout, 60 s total, 10 MB response cap; `download` streams any size to a file (1 h).
+- GET retries once on a connection error or 5xx; POST is never retried.
+- A credential header (`_credential`) is sent over plain http to loopback only (INSECURE_TRANSPORT), and is dropped
+  on any redirect that changes scheme or host; a POST is never redirected to another scheme or host, and no request
+  follows an https -> http downgrade.
+- Non-2xx -> NetworkError(status=..., body=...); `get_json` and `get_text` answer None for a status listed in
+  `missing` (e.g. 404: the record does not exist).
+- A body that is not JSON where JSON is read (`Reply.json`), or a GraphQL reply carrying `errors`, raises
+  BAD_RESPONSE even at HTTP 200.
+- Error messages are redacted and carry URLs without query strings.
+"""
+
+from __future__ import annotations
+
+import http.client
+import ipaddress
+import os
+import ssl
+import time
+import urllib.parse
+from dataclasses import dataclass, field
+from functools import lru_cache
+from pathlib import Path
+from typing import Any
+
+from trialscout import __version__
+from trialscout.errors import NetworkError
+from trialscout.files import loads_json
+from trialscout.keys import redact
+
+CONNECT_TIMEOUT_S = 10.0
+TOTAL_TIMEOUT_S = 60.0
+MAX_RESPONSE_BYTES = 10 * 1024 * 1024
+MAX_REDIRECTS = 5
+DOWNLOAD_TIMEOUT_S = 3600.0  # a multi-GB export over a slow link
+USER_AGENT = f"trialscout/{__version__}"
+
+
+@dataclass(frozen=True)
+class Reply:
+    status: int
+    headers: dict[str, str] = field(default_factory=dict)  # lower-cased names
+    text: str = ""
+    url: str = ""
+
+    def json(self) -> Any:
+        try:
+            return loads_json(self.text)
+        except ValueError:
+            raise NetworkError(f"invalid JSON from {strip_query(self.url)}", code="BAD_RESPONSE") from None
+
+
+def strip_query(url: str) -> str:
+    """URL without query string or fragment (URLs are stored and reported this way)."""
+    parts = urllib.parse.urlsplit(url)
+    return urllib.parse.urlunsplit((parts.scheme, parts.netloc, parts.path, "", ""))
+
+
+@lru_cache(maxsize=1)
+def _ssl_context() -> ssl.SSLContext:
+    try:
+        return ssl.create_default_context()
+    except ssl.SSLError:  # a malformed OS cert store entry breaks load_default_certs; use a CA bundle file instead
+        cafile = ssl.get_default_verify_paths().cafile
+        if not cafile or not os.path.isfile(cafile):
+            import certifi  # type: ignore[import-not-found]
+
+            cafile = certifi.where()
+        return ssl.create_default_context(cafile=cafile)
+
+
+def _with_params(url: str, params: dict[str, Any] | None) -> str:
+    if not params:
+        return url
+    query = urllib.parse.urlencode({k: v for k, v in params.items() if v is not None}, doseq=True)
+    return f"{url}{'&' if '?' in url else '?'}{query}"
+
+
+def request(
+    method: str,
+    url: str,
+    *,
+    params: dict[str, Any] | None = None,
+    headers: dict[str, str] | None = None,
+    body: bytes | None = None,
+    timeout: float = TOTAL_TIMEOUT_S,
+) -> Reply:
+    """One HTTP exchange with the rules above. Returns Reply for 2xx, raises NetworkError otherwise."""
+    full, hdrs = _with_params(url, params), {"User-Agent": USER_AGENT, **(headers or {})}
+    try:
+        return _once(method, full, hdrs, body, timeout)
+    except NetworkError as exc:
+        if method != "GET" or exc.code != "NETWORK_ERROR" or (exc.status is not None and exc.status < 500):
+            raise
+    time.sleep(0.5)
+    return _once(method, full, hdrs, body, timeout)
+
+
+def _loopback(host: str | None) -> bool:
+    try:
+        return host == "localhost" or ipaddress.ip_address(host or "").is_loopback
+    except ValueError:
+        return False
+
+
+def _credential(header: str) -> bool:
+    """A header that carries a secret (Authorization, api-key, cookies, tokens): never sent to another host."""
+    h = header.lower()
+    return h == "cookie" or any(w in h for w in ("auth", "key", "token", "secret", "session", "pass"))
+
+
+def _once(method: str, url: str, headers: dict[str, str], body: bytes | None, timeout: float, sink: Path | None = None) -> Reply:
+    deadline = time.monotonic() + timeout
+    for _ in range(MAX_REDIRECTS + 1):
+        parts = urllib.parse.urlsplit(url)
+        shown = strip_query(url)
+        if parts.scheme not in ("http", "https"):
+            raise NetworkError(f"unsupported URL scheme: {shown}")
+        if parts.scheme == "http" and not _loopback(parts.hostname) and any(map(_credential, headers)):
+            raise NetworkError(f"refused to send a credential to {shown} over plain http", code="INSECURE_TRANSPORT")
+        conn = _connection(parts, shown)
+        try:
+            conn.connect()
+            conn.sock.settimeout(max(0.1, deadline - time.monotonic()))  # connect 10 s, then the total budget
+            target = urllib.parse.urlunsplit(("", "", parts.path or "/", parts.query, ""))
+            conn.request(method, target, body=body, headers=headers)
+            resp = conn.getresponse()
+            if sink is not None and 200 <= resp.status < 300:
+                _stream(resp, sink, deadline, shown)
+                return Reply(resp.status, {k.lower(): v for k, v in resp.getheaders()}, "", url)
+            data = _read_capped(resp, deadline, shown)
+        except (OSError, http.client.HTTPException) as exc:
+            raise NetworkError(redact(f"{method} {shown} failed: {exc}")) from None
+        finally:
+            conn.close()
+        location = resp.getheader("Location")
+        if resp.status in (301, 302, 303, 307, 308) and location:
+            new = urllib.parse.urljoin(url, location)
+            target_parts = urllib.parse.urlsplit(new)
+            if parts.scheme == "https" and target_parts.scheme == "http":
+                raise NetworkError(f"refused a redirect of {shown} from https to http", code="REDIRECT_REFUSED")
+            if method == "POST" and (target_parts.scheme, target_parts.netloc) != (parts.scheme, parts.netloc):
+                raise NetworkError(f"refused a redirect of POST {shown} to another scheme or host", code="REDIRECT_REFUSED")
+            if (target_parts.scheme, target_parts.netloc) != (parts.scheme, parts.netloc):
+                headers = {k: v for k, v in headers.items() if not _credential(k)}
+            if resp.status == 303 or (resp.status in (301, 302) and method == "POST"):
+                method, body = "GET", None
+            url = new
+            continue
+        text = data.decode(resp.headers.get_content_charset() or "utf-8", errors="replace")
+        if 200 <= resp.status < 300:
+            return Reply(resp.status, {k.lower(): v for k, v in resp.getheaders()}, text, url)
+        raise NetworkError(redact(f"HTTP {resp.status} from {shown}"), status=resp.status, body=redact(text[:2000]))
+    raise NetworkError(f"too many redirects from {strip_query(url)}")
+
+
+def _connection(parts: urllib.parse.SplitResult, shown: str) -> http.client.HTTPConnection:
+    if parts.scheme == "http":
+        return http.client.HTTPConnection(parts.hostname or "", parts.port, timeout=CONNECT_TIMEOUT_S)
+    try:
+        context = _ssl_context()
+    except (OSError, ImportError) as exc:
+        raise NetworkError(f"no usable TLS trust store for {shown}: {exc}") from None
+    return http.client.HTTPSConnection(parts.hostname or "", parts.port, timeout=CONNECT_TIMEOUT_S, context=context)
+
+
+def _read_capped(resp: Any, deadline: float, shown: str) -> bytes:
+    chunks, size = [], 0
+    while chunk := resp.read(65536):
+        size += len(chunk)
+        if size > MAX_RESPONSE_BYTES:
+            raise NetworkError(f"response from {shown} exceeds {MAX_RESPONSE_BYTES} bytes", code="RESPONSE_TOO_LARGE")
+        if time.monotonic() > deadline:
+            raise NetworkError(f"{shown} exceeded its deadline", code="NETWORK_TIMEOUT")
+        chunks.append(chunk)
+    return b"".join(chunks)
+
+
+def _stream(resp: Any, sink: Path, deadline: float, shown: str) -> None:
+    """Write a 2xx body of any size to `sink` (via a temp file, renamed when complete)."""
+    tmp = sink.with_name(f".{sink.name}.part")
+    try:
+        with open(tmp, "wb") as fh:
+            while chunk := resp.read(1 << 20):
+                if time.monotonic() > deadline:
+                    raise NetworkError(f"{shown} exceeded its deadline", code="NETWORK_TIMEOUT")
+                fh.write(chunk)
+        os.replace(tmp, sink)
+    finally:
+        tmp.unlink(missing_ok=True)
+
+
+def _get(url: str, params: dict[str, Any] | None, headers: dict[str, str] | None, missing: tuple[int, ...]) -> Reply | None:
+    try:
+        return request("GET", url, params=params, headers=headers)
+    except NetworkError as exc:
+        if exc.status in missing:
+            return None
+        raise
+
+
+def get_json(url: str, params: dict[str, Any] | None = None, headers: dict[str, str] | None = None, *,
+             missing: tuple[int, ...] = ()) -> Any:
+    """GET and parse JSON (NaN rejected); a status in `missing` answers None."""
+    reply = _get(url, params, {"Accept": "application/json", **(headers or {})}, missing)
+    return None if reply is None else reply.json()
+
+

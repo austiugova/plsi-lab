@@ -1,0 +1,15 @@
+---
+description: Lab Journal records - how entries, versions and signed records may change
+alwaysApply: false
+globs:
+  - "**/lab-journal/**"
+---
+
+lab-journal:
+
+- Follow the `lab-journal` skill for any wet-lab entry, plan, plasmid, calculation or the journal page.
+- The journal changes only through `<home>/lj` commands: write drafts under `<home>/drafts/`, save with `lj save`.
+- Never edit, move or delete files in `<home>/journal/` or `<home>/app/` by hand or with a script.
+- A signed entry never changes; a correction is a new entry with `"amends"`.
+- Every number comes from `lj` output; a calculation the journal lacks is "not in this journal yet", never your own.
+- Never invent a value, lot, band or Ct: leave a field out when it was not given.

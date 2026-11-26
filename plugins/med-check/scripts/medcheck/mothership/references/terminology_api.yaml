@@ -1,0 +1,8 @@
+rxnav:
+  title: NLM RxNav (RxNorm REST API)
+  url: https://lhncbc.nlm.nih.gov/RxNav/APIs/RxNormAPIs.html
+  api_base: https://rxnav.nlm.nih.gov/REST
+  licence: RxNav Terms of Service, https://lhncbc.nlm.nih.gov/RxNav/TermsofService.html
+  notes: GET /approximateTerm.json?term=T&maxEntries=10&option=1 (scores are not normalized; dedupe by rxcui); ingredient
+    via GET /rxcui/{rxcui}/related.json?tty=IN+PIN (not allrelated). The drug-drug interaction API (/interaction/*) was retired
+    in 2024 and returns 404. No key; 20 req/s per IP.
